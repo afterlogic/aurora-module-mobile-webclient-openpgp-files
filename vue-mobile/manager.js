@@ -1,6 +1,6 @@
 import eventBus from 'src/event-bus'
 import { defineAsyncComponent, shallowRef } from 'vue'
-
+import { setFileActions } from "./files/file-operations";
 
 const _getEncryptedShareableLinkDialog = (callBack) => {
     callBack({
@@ -15,11 +15,8 @@ export default {
     requiredModules: [],
 
     init (appdata) {
-        console.log('OpenPgpFilesMobileWebclient')
-        const fileOperations = require('../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/files/file-operations')
-        console.log('open pgp setFileActions')
-        eventBus.$off('FilesMobileWebClient::getFileActionsList', fileOperations.setFileActions)
-        eventBus.$on('FilesMobileWebClient::getFileActionsList', fileOperations.setFileActions)
+        eventBus.$off('FilesMobileWebClient::getFileActionsList', setFileActions)
+        eventBus.$on('FilesMobileWebClient::getFileActionsList', setFileActions)
 
     },
     initSubscriptions(appData) {
