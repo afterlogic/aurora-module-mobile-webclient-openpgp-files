@@ -20,7 +20,6 @@ export default {
 
     },
     initSubscriptions(appData) {
-        console.log(appData, 'appData pgp')
         eventBus.$off('FilesMobile::GetEncryptedShareableLinkDialog', _getEncryptedShareableLinkDialog)
         eventBus.$on('FilesMobile::GetEncryptedShareableLinkDialog', _getEncryptedShareableLinkDialog)
     }

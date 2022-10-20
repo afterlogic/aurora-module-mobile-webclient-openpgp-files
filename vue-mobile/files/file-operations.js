@@ -1,12 +1,14 @@
-import {i18n} from "../../../CoreMobileWebclient/vue-mobile/src/boot/i18n";
-import { defineAsyncComponent } from "vue";
+import { i18n } from 'src/boot/i18n'
+import { defineAsyncComponent } from 'vue'
 
 export const setFileActions = (actions) => {
-    console.log(i18n, 'i18n')
+    //TODO this shouldn't override the existing button, but adds new one.
+    //The original button must be controlled by settings
     actions['createShareableLink'] = {
         method: null,
         name: 'createShareableLink',
-        component: defineAsyncComponent(() => import('../../../OpenPgpFilesMobileWebclient/vue-mobile/components/files/dialogs/EncryptedShareableLinkDialog')),
+        // component: defineAsyncComponent(() => import('../../../OpenPgpFilesMobileWebclient/vue-mobile/components/files/dialogs/EncryptedShareableLinkDialog')),
+        getComponent: () => { return defineAsyncComponent(() => import('../components/files/dialogs/EncryptedShareableLinkDialog')) },
         displayName: i18n.global.t('OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE'),
         icon: 'SecureLinkIcon',
         isShowAction: actions.createShareableLink.isShowAction,
