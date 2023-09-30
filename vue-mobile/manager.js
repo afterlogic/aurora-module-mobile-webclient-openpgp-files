@@ -1,6 +1,6 @@
 import eventBus from 'src/event-bus'
 import { defineAsyncComponent, shallowRef } from 'vue'
-import { setFileActions } from "./files/file-operations";
+import { setFileActions } from './files/file-operations'
 
 const _getEncryptedShareableLinkDialog = (callBack) => {
     callBack({

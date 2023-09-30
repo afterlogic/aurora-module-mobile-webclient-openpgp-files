@@ -46,7 +46,7 @@
 
 <script>
 import eventBus from "src/event-bus";
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
 import AppContactItem from "components/common/AppContactItem";
 import AppCheckbox from "components/common/AppCheckbox";
 

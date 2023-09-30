@@ -121,7 +121,7 @@ import ButtonDialog from "src/components/common/ButtonDialog";
 import AppContactItem from "src/components/common/AppContactItem";
 import CopyIcon from "../../../../../FilesMobileWebclient/vue-mobile/components/icons/CopyIcon";
 import AppCheckbox from "src/components/common/AppCheckbox";
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'pinia'
 import AppSelectRecipient from "src/components/common/AppSelectRecipient";
 import EncryptedShareableLinkActions from "./encrypted-shareable-link/EncryptedShareableLinkActions";
 import EncryptedShareableLinkHead from "./encrypted-shareable-link/EncryptedShareableLinkHead";

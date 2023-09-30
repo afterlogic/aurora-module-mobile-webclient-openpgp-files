@@ -10,14 +10,17 @@
 
 <script>
 import eventBus from 'src/event-bus'
-import notification from "src/utils/notification";
-import OpenPgp from "../../../../../../OpenPgpMobileWebclient/vue-mobile/openpgp-helper";
-import { askOpenPgpKeyPassword } from "../../../../../../OpenPgpMobileWebclient/vue-mobile/utils";
-import { getApiHost } from "src/api/helpers";
-import CCrypto from "../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/crypto/CCrypto";
+import notification from 'src/utils/notification'
+import OpenPgp from '../../../../../../OpenPgpMobileWebclient/vue-mobile/openpgp-helper'
+import { askOpenPgpKeyPassword } from '../../../../../../OpenPgpMobileWebclient/vue-mobile/utils'
+import { getApiHost } from 'src/api/helpers'
+import CCrypto from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/crypto/CCrypto'
 
-import ButtonDialog from "components/common/ButtonDialog";
-import { mapGetters, mapActions } from "vuex";
+import ButtonDialog from 'components/common/ButtonDialog'
+import { mapGetters, mapActions } from 'pinia'
+import { useCoreStore } from 'src/stores/index-pinia'
+import { useFilesStore } from '../../../../../../FilesMobileWebclient/vue-mobile/store/index-pinia'
+import { useFilesStore } from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/store/index-pinia'
 
 export default {
   name: "EncryptedShareableLinkActions",
@@ -25,8 +28,8 @@ export default {
     ButtonDialog
   },
   computed: {
-    ...mapGetters('core', ['userPublicId']),
-    ...mapGetters('filesmobile', ['currentPath', 'currentStorage', 'currentFile']),
+    ...mapGetters(useCoreStore, ['userPublicId']),
+    ...mapGetters(useFilesStore, ['currentPath', 'currentStorage', 'currentFile']),
   },
   props: {
     recipient: { type: Object, default: () => ({ FullName: 'Not Selected', empty: true })}
@@ -40,7 +43,7 @@ export default {
     creating: false
   }),
   methods: {
-    ...mapActions('filesmobile', ['asyncUpdateExtendedProps', 'changeItemProperty']),
+    ...mapActions(useFilesStore, ['asyncUpdateExtendedProps', 'changeItemProperty']),
     ...mapActions('coreparanoidencryptionplugin', ['asyncCreatePublicLink']),
     getShareableParams() {
       eventBus.$emit('CoreParanoidEncryptionWebclient::getShareableParams', this.onStartEncrypt)
