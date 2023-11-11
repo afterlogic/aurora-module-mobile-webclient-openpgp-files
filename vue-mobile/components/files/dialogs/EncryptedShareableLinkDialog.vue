@@ -1,28 +1,22 @@
 <template>
-  <app-dialog :close="cancelDialog">
+  <AppDialog :close="cancelDialog">
     <template v-slot:title>
       <div v-if="currentFile && (!currentFile.paranoidKey || currentFile.publicLink)">
         <div v-if="!currentFile.publicLink">
-            <span>{{
-                $t('OPENPGPFILESWEBCLIENT.HEADING_CREATE_PUBLIC_LINK')
-              }}</span>
+          <span>{{ $t('OPENPGPFILESWEBCLIENT.HEADING_CREATE_PUBLIC_LINK') }}</span>
         </div>
         <div v-if="currentFile.publicLink">
-              <span>{{
-                  currentFile.linkPassword ? 'Protected public link' : $t('FILESWEBCLIENT.LABEL_PUBLIC_LINK')
-                }}</span>
+          <span>{{ currentFile.linkPassword ? 'Protected public link' : $t('FILESWEBCLIENT.LABEL_PUBLIC_LINK') }}</span>
         </div>
       </div>
       <div v-else class="q-mb-lg">
-        <span>
-          {{ $t('OPENPGPFILESWEBCLIENT.HEADING_SEND_ENCRYPTED_FILE') }}
-        </span>
+        <span>{{ $t('OPENPGPFILESWEBCLIENT.HEADING_SEND_ENCRYPTED_FILE') }}</span>
       </div>
     </template>
     <template v-slot:content>
       <div v-if="currentFile && !showSelectRecipient && (!currentFile.paranoidKey || currentFile.publicLink)">
         <div v-if="!currentFile.publicLink">
-          <app-checkbox
+          <AppCheckbox
               class="q-pl-lg q-py-lg q-pr-md"
               v-model="withPassword"
               leftLabel
@@ -35,13 +29,13 @@
               <div class="q-mb-sm recipient">
                 <span>{{ $t('OPENPGPFILESWEBCLIENT.LABEL_RECIPIENT') }}:</span>
               </div>
-              <app-contact-item :contact="recipient"/>
+              <AppContactItem :contact="recipient" />
             </div>
             <div class="q-mb-md q-mt-lg" @click.stop="copyText(currentFile.publicLink, $t('FILESWEBCLIENT.LABEL_PUBLIC_LINK'))">
               <div class="q-mb-sm field__title">Link text</div>
               <div class="flex no-wrap">
                 <div class="flex justify-center items-center q-mr-sm">
-                  <copy-icon/>
+                  <CopyIcon />
                 </div>
                 <div class="text__caption flex items-center">
                   <span>{{ currentFile.publicLink }}</span>
@@ -55,7 +49,7 @@
               <div class="q-mb-sm field__title">{{ $t('COREWEBCLIENT.LABEL_PASSWORD') }}</div>
               <div class="flex no-wrap">
                 <div class="q-mt-xs q-mr-sm">
-                  <copy-icon/>
+                  <CopyIcon />
                 </div>
                 <div class="text__caption flex items-center">
                   <span>{{ currentFile.linkPassword }}</span>
@@ -71,9 +65,9 @@
         </div>
       </div>
       <div v-if="currentFile && !showSelectRecipient && currentFile.paranoidKey && !currentFile.publicLink">
-        <encrypted-shareable-link-head :recipient="recipient"  @selectRecipient="selectRecipient"/>
+        <EncryptedShareableLinkHead :recipient="recipient"  @selectRecipient="selectRecipient" />
       </div>
-      <app-select-recipient
+      <AppSelectRecipient
           v-if="showSelectRecipient"
           :getContactsParameters="getContactsParameters"
           :onGetContacts="getContacts"
@@ -83,20 +77,20 @@
     <template v-if="!showSelectRecipient" v-slot:actions>
       <div v-if="currentFile && (!currentFile.paranoidKey || currentFile.publicLink)" class="full-width q-mx-lg q-mb-sm">
         <div v-if="!currentFile.publicLink" class="flex justify-end q-pr-sm">
-          <button-dialog
+          <ButtonDialog
               :saving="saving"
               :action="createShareableLink"
               :label="createBtnLabel"
           />
         </div>
         <div v-if="currentFile.publicLink" :class="`full-width flex ${isCreatingLink ? 'justify-end' : 'justify-between'} q-px-sm`">
-          <button-dialog
+          <ButtonDialog
               v-if="!isCreatingLink"
               :saving="saving"
               :action="removeLink"
               :label="$t('FILESWEBCLIENT.ACTION_REMOVE_PUBLIC_LINK')"
           />
-          <button-dialog
+          <ButtonDialog
               :disabled="recipient.empty || (isCreatingLink && !recipient?.HasPgpPublicKey && currentFile.linkPassword)"
               :saving="saving"
               :action="sendViaMessage"
@@ -111,11 +105,10 @@
         />
       </div>
     </template>
-  </app-dialog>
+  </AppDialog>
 </template>
 
 <script>
-
 import AppDialog from "src/components/common/AppDialog";
 import ButtonDialog from "src/components/common/ButtonDialog";
 import AppContactItem from "src/components/common/AppContactItem";
@@ -126,7 +119,6 @@ import AppSelectRecipient from "src/components/common/AppSelectRecipient";
 import EncryptedShareableLinkActions from "./encrypted-shareable-link/EncryptedShareableLinkActions";
 import EncryptedShareableLinkHead from "./encrypted-shareable-link/EncryptedShareableLinkHead";
 import notification from "src/utils/notification";
-
 
 export default {
   name: "EncryptedShareableLinkDialog",
