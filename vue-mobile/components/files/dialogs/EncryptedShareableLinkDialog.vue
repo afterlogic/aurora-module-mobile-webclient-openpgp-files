@@ -114,11 +114,13 @@ import ButtonDialog from "src/components/common/ButtonDialog";
 import AppContactItem from "src/components/common/AppContactItem";
 import CopyIcon from "../../../../../FilesMobileWebclient/vue-mobile/components/icons/CopyIcon";
 import AppCheckbox from "src/components/common/AppCheckbox";
-import { mapGetters, mapActions } from 'pinia'
 import AppSelectRecipient from "src/components/common/AppSelectRecipient";
 import EncryptedShareableLinkActions from "./encrypted-shareable-link/EncryptedShareableLinkActions";
 import EncryptedShareableLinkHead from "./encrypted-shareable-link/EncryptedShareableLinkHead";
 import notification from "src/utils/notification";
+
+import { mapGetters, mapActions } from 'pinia'
+import { useFilesStore } from 'src/stores/index-all'
 
 export default {
   name: "EncryptedShareableLinkDialog",
@@ -154,7 +156,7 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters('filesmobile', ['currentFile']),
+    ...mapGetters(useFilesStore, ['currentFile']),
     sendLabel() {
       return this.$t('OPENPGPFILESWEBCLIENT.ACTION_SEND_ENCRYPTED_EMAIL')
     },
@@ -168,7 +170,7 @@ export default {
     console.log('pgp')
   },
   methods: {
-    ...mapActions('filesmobile', ['getContactSuggestions', 'asyncCreateShareableLink', 'asyncDeletePublicLink', 'changeItemProperty']),
+    ...mapActions(useFilesStore, ['getContactSuggestions', 'asyncCreateShareableLink', 'asyncDeletePublicLink', 'changeItemProperty']),
     cancelDialog() {
       if (this.showSelectRecipient) {
         this.showSelectRecipient = false

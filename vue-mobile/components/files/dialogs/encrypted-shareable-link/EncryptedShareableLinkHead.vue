@@ -47,6 +47,7 @@
 <script>
 import eventBus from "src/event-bus";
 import { mapActions } from 'pinia'
+import { useFilesStore, useOpenPGPStore } from 'src/stores/index-all'
 import AppContactItem from "components/common/AppContactItem";
 import AppCheckbox from "components/common/AppCheckbox";
 
@@ -123,8 +124,8 @@ export default {
     },
   },
   methods: {
-    ...mapActions('filesmobile', ['getContactSuggestions']),
-    ...mapActions('openpgpmobile', ['asyncGetExternalsKeys']),
+    ...mapActions(useFilesStore, ['getContactSuggestions']),
+    ...mapActions(useOpenPGPStore, ['asyncGetExternalsKeys']),
     changeRecipient() {
       this.$emit('selectRecipient')
     },

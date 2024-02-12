@@ -17,10 +17,9 @@ import { getApiHost } from 'src/api/helpers'
 import CCrypto from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/crypto/CCrypto'
 
 import ButtonDialog from 'components/common/ButtonDialog'
+
 import { mapGetters, mapActions } from 'pinia'
-import { useCoreStore } from 'src/stores/index-pinia'
-import { useFilesStore } from '../../../../../../FilesMobileWebclient/vue-mobile/store/index-pinia'
-import { useFilesStore } from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/store/index-pinia'
+import { useCoreStore, useFilesStore, useParanoidEncryptionStore } from 'src/stores/index-all'
 
 export default {
   name: "EncryptedShareableLinkActions",
@@ -44,7 +43,7 @@ export default {
   }),
   methods: {
     ...mapActions(useFilesStore, ['asyncUpdateExtendedProps', 'changeItemProperty']),
-    ...mapActions('coreparanoidencryptionplugin', ['asyncCreatePublicLink']),
+    ...mapActions(useParanoidEncryptionStore, ['asyncCreatePublicLink']),
     getShareableParams() {
       eventBus.$emit('CoreParanoidEncryptionWebclient::getShareableParams', this.onStartEncrypt)
     },
