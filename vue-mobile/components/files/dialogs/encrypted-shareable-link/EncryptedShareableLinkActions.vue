@@ -11,15 +11,15 @@
 <script>
 import eventBus from 'src/event-bus'
 import notification from 'src/utils/notification'
-import OpenPgp from '../../../../../../OpenPgpMobileWebclient/vue-mobile/openpgp-helper'
 import { askOpenPgpKeyPassword } from '../../../../../../OpenPgpMobileWebclient/vue-mobile/utils'
 import { getApiHost } from 'src/api/helpers'
-import CCrypto from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/crypto/CCrypto'
 
 import ButtonDialog from 'components/common/ButtonDialog'
 
 import { mapGetters, mapActions } from 'pinia'
-import { useCoreStore, useFilesStore, useParanoidEncryptionStore } from 'src/stores/index-all'
+import { useCoreStore } from '../../../../../../CoreMobileWebclient/vue-mobile/src/stores/index-pinia'
+import { useFilesStore } from '../../../../../../FilesMobileWebclient/vue-mobile/store/index-pinia'
+import { useParanoidEncryptionStore } from '../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/store/index-pinia'
 
 export default {
   name: "EncryptedShareableLinkActions",
@@ -48,12 +48,12 @@ export default {
       eventBus.$emit('CoreParanoidEncryptionWebclient::getShareableParams', this.onStartEncrypt)
     },
     onStartEncrypt(shareableLinkParams) {
-      console.log(shareableLinkParams, 'shareableLinkParams')
       this.shareableLinkParams = shareableLinkParams
       this.encrypt()
     },
-    encrypt() {
+    async encrypt() {
         this.creating = true
+        const OpenPgp = (await import('../../../../../../OpenPgpMobileWebclient/vue-mobile/openpgp-helper')).default
         const privateKey = OpenPgp.getPrivateKeyByEmail(this.userPublicId)
         if (privateKey) {
           let sPassphrase = privateKey.getPassphrase()
@@ -68,9 +68,11 @@ export default {
         }
 
     },
-    encryptLink (passPassphrase) {
+    async encryptLink (passPassphrase) {
       this.passphrase = passPassphrase
 
+      const OpenPgp = (await import('../../../../../../OpenPgpMobileWebclient/vue-mobile/openpgp-helper')).default
+      const CCrypto = (await import('../../../../../../CoreParanoidEncryptionWebclientPlugin/vue-mobile/crypto/CCrypto')).default
       const privateKey = OpenPgp.getPrivateKeyByEmail(this.userPublicId)
       const publicKey = OpenPgp.getPublicKeyByEmail(this.userPublicId)
       const principalsEmails = []

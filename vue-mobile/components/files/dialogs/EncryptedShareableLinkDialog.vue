@@ -25,12 +25,6 @@
         </div>
         <div v-if="currentFile.publicLink">
           <div class="q-px-lg">
-            <div v-if="recipient" @click="selectRecipient" class="q-mt-lg">
-              <div class="q-mb-sm recipient">
-                <span>{{ $t('OPENPGPFILESWEBCLIENT.LABEL_RECIPIENT') }}:</span>
-              </div>
-              <AppContactItem :contact="recipient" />
-            </div>
             <div class="q-mb-md q-mt-lg" @click.stop="copyText(currentFile.publicLink, $t('FILESWEBCLIENT.LABEL_PUBLIC_LINK'))">
               <div class="q-mb-sm field__title">Link text</div>
               <div class="flex no-wrap">
@@ -57,9 +51,32 @@
               </div>
             </div>
             <div v-if="currentFile.linkPassword" class="q-my-md">
-                <span class="inscription">
-                  {{$t('OPENPGPFILESWEBCLIENT.HINT_STORE_PASSWORD')}}
-                </span>
+              <span class="inscription">
+                {{ $t('OPENPGPFILESWEBCLIENT.HINT_STORE_PASSWORD') }}
+              </span>
+            </div>
+          </div>
+          <div v-if="currentFile.linkPassword" class="section-separator" />
+          <div class="q-px-lg">
+            <div @click="selectRecipient" class="q-mt-lg">
+              <div class="q-mb-sm recipient">
+                <span>{{ $t('OPENPGPFILESWEBCLIENT.LABEL_RECIPIENT') }}:</span>
+              </div>
+              <AppContactItem :contact="recipient" />
+            </div>
+            <div v-if="!recipient.empty" class="q-mt-sm">
+              <span class="inscription">{{ sendLinkHintText }}</span>
+            </div>
+            <div v-if="showSignCheckbox" class="q-mt-md">
+              <AppCheckbox
+                  v-model="addDigitalSignature"
+                  :disable="!isSigningAvailable"
+                  leftLabel
+                  :label="$t('OPENPGPFILESWEBCLIENT.LABEL_SIGN')"
+              />
+            </div>
+            <div v-if="showSignCheckbox" class="q-mt-sm q-mb-md">
+              <span class="inscription">{{ signEmailHintText }}</span>
             </div>
           </div>
         </div>
@@ -115,12 +132,22 @@ import AppContactItem from "src/components/common/AppContactItem";
 import CopyIcon from "../../../../../FilesMobileWebclient/vue-mobile/components/icons/CopyIcon";
 import AppCheckbox from "src/components/common/AppCheckbox";
 import AppSelectRecipient from "src/components/common/AppSelectRecipient";
-import EncryptedShareableLinkActions from "./encrypted-shareable-link/EncryptedShareableLinkActions";
-import EncryptedShareableLinkHead from "./encrypted-shareable-link/EncryptedShareableLinkHead";
 import notification from "src/utils/notification";
 
-import { mapGetters, mapActions } from 'pinia'
-import { useFilesStore } from 'src/stores/index-all'
+import { defineAsyncComponent } from 'vue'
+import { mapGetters, mapActions, mapState } from 'pinia'
+import { useFilesStore } from '../../../../../FilesMobileWebclient/vue-mobile/store/index-pinia'
+import { useOpenPGPStore } from '../../../../../OpenPgpMobileWebclient/vue-mobile/store/index-pinia'
+import { useCoreStore } from '../../../../../CoreMobileWebclient/vue-mobile/src/stores/index-pinia'
+import { formatHintText } from '../../../../../FilesMobileWebclient/vue-mobile/utils/common'
+import { sendShareableLinkViaEmail } from '../../../utils/send-shareable-link-email'
+
+const EncryptedShareableLinkActions = defineAsyncComponent(() =>
+  import('./encrypted-shareable-link/EncryptedShareableLinkActions')
+)
+const EncryptedShareableLinkHead = defineAsyncComponent(() =>
+  import('./encrypted-shareable-link/EncryptedShareableLinkHead')
+)
 
 export default {
   name: "EncryptedShareableLinkDialog",
@@ -146,6 +173,7 @@ export default {
     showSelectRecipient: false,
     sendLinkLabel: '',
     isRecipientDisabled: false,
+    addDigitalSignature: false,
     getContactsParameters: {
       Search:'',
       Storage:'all',
@@ -157,6 +185,8 @@ export default {
   }),
   computed: {
     ...mapGetters(useFilesStore, ['currentFile']),
+    ...mapState(useOpenPGPStore, ['myPrivateKeys']),
+    ...mapState(useCoreStore, ['userPublicId']),
     sendLabel() {
       return this.$t('OPENPGPFILESWEBCLIENT.ACTION_SEND_ENCRYPTED_EMAIL')
     },
@@ -164,6 +194,46 @@ export default {
       return this.withPassword
           ? 'Create protected link'
           : 'Create shareable link'
+    },
+    isSigningAvailable() {
+      return !!(this.currentFile?.linkPassword && this.recipientHasPgpKey && this.myPrivateKeys?.length)
+    },
+    showSignCheckbox() {
+      return !!(this.currentFile?.linkPassword && this.recipientHasPgpKey)
+    },
+    recipientHasPgpKey() {
+      return !!(this.recipient?.HasPgpPublicKey || this.recipient?.hasPgpPublicKey || this.recipient?.PublicPgpKey)
+    },
+    sendLinkHintText() {
+      if (this.recipient?.empty) {
+        return ''
+      }
+      if (this.recipientHasPgpKey) {
+        if (this.currentFile?.linkPassword) {
+          if (this.addDigitalSignature && this.isSigningAvailable) {
+            return formatHintText(this.$t('OPENPGPFILESWEBCLIENT.HINT_SEND_LINK_AND_PASSWORD_SIGNED'))
+          }
+          return formatHintText(this.$t('OPENPGPFILESWEBCLIENT.HINT_SEND_LINK_AND_PASSWORD'))
+        }
+        return formatHintText(this.$t('OPENPGPFILESWEBCLIENT.HINT_SEND_LINK'))
+      }
+      if (this.currentFile?.linkPassword) {
+        return formatHintText(this.$t('OPENPGPFILESWEBCLIENT.HINT_SEND_DIFFERENT_CHANNEL'))
+      }
+      return formatHintText(this.$t('OPENPGPFILESWEBCLIENT.HINT_SEND_LINK'))
+    },
+    signEmailHintText() {
+      return formatHintText(this.addDigitalSignature
+        ? this.$t('OPENPGPFILESWEBCLIENT.HINT_SIGN_EMAIL')
+        : this.$t('OPENPGPFILESWEBCLIENT.HINT_NOT_SIGN_EMAIL'))
+    },
+  },
+  watch: {
+    recipient: {
+      handler() {
+        this.addDigitalSignature = !!(this.recipientHasPgpKey && this.currentFile?.linkPassword && this.myPrivateKeys?.length)
+      },
+      deep: true,
     },
   },
   mounted() {
@@ -202,6 +272,7 @@ export default {
       this.publicLink = this.currentFile.publicLink
       this.linkPassword = this.currentFile.linkPassword
       this.isCreatingLink = true
+      this.addDigitalSignature = false
     },
     async removeLink() {
       this.saving = true
@@ -209,14 +280,34 @@ export default {
       this.saving = false
       if (result) this.$emit('closeDialog')
     },
-    sendViaMessage() {
-      console.log('coming soon')
+    async sendViaMessage() {
+      if (this.recipient.empty || this.saving) {
+        return
+      }
+
+      this.saving = true
+      try {
+        const result = await sendShareableLinkViaEmail({
+          file: this.currentFile,
+          recipient: this.recipient,
+          addDigitalSignature: this.addDigitalSignature,
+          userEmail: this.userPublicId,
+          router: this.$router,
+          getParentComponent: this.$root._getParentComponent,
+        })
+
+        if (result) {
+          this.$emit('closeDialog')
+        }
+      } finally {
+        this.saving = false
+      }
     },
     async getContacts(params) {
       return await this.getContactSuggestions(params)
     },
     selectContact(contact) {
-      this.recipient = contact
+      this.recipient = { ...contact, empty: false }
       this.showSelectRecipient = false
     }
   }
@@ -231,8 +322,10 @@ export default {
   line-height: 16px;
   letter-spacing: 0.3px;
 }
+.section-separator {
+  border-top: 1px solid #D3D3D3;
+}
 .recipient {
-  margin-top: 32px;
   font-size: 14px;
   line-height: 16px;
   letter-spacing: 0.3px;

@@ -47,7 +47,8 @@
 <script>
 import eventBus from "src/event-bus";
 import { mapActions } from 'pinia'
-import { useFilesStore, useOpenPGPStore } from 'src/stores/index-all'
+import { useFilesStore } from '../../../../../../FilesMobileWebclient/vue-mobile/store/index-pinia'
+import { useOpenPGPStore } from '../../../../../../OpenPgpMobileWebclient/vue-mobile/store/index-pinia'
 import AppContactItem from "components/common/AppContactItem";
 import AppCheckbox from "components/common/AppCheckbox";
 
