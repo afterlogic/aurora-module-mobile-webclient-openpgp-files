@@ -32,15 +32,17 @@ const getPublicKeysForRecipient = async (OpenPgp, recipient) => {
 
   if (recipient?.UUID) {
     const keysFromApi = await openpgpWebApi.getPublicKeysByContactUUIDs([recipient.UUID])
-    keysFromApi.forEach((item) => {
-      if (item.PublicPgpKey) {
-        publicKeys.push(new OpenPgpKey({
-          armor: item.PublicPgpKey,
-          email: contactEmail,
-          isPublic: true,
-        }))
-      }
-    })
+    if (Array.isArray(keysFromApi)) {
+      keysFromApi.forEach((item) => {
+        if (item.PublicPgpKey) {
+          publicKeys.push(new OpenPgpKey({
+            armor: item.PublicPgpKey,
+            email: contactEmail,
+            isPublic: true,
+          }))
+        }
+      })
+    }
   }
 
   if (!publicKeys.length && contactEmail) {
