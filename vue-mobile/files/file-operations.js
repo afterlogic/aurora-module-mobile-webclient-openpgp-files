@@ -1,4 +1,3 @@
-import { i18n } from 'src/boot/i18n'
 import { defineAsyncComponent } from 'vue'
 
 function loadShareableLinkDialog() {
@@ -17,7 +16,7 @@ export const setFileActions = (actions) => {
         method: null,
         name: 'createShareableLink',
         getComponent: () => defineAsyncComponent(() => loadShareableLinkDialog()),
-        displayName: i18n.global.t('OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE'),
+        displayNameKey: 'OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE',
         icon: 'SecureLinkIcon',
         isShowAction,
     }
