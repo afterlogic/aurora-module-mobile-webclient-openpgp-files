@@ -141,6 +141,7 @@ import { useOpenPGPStore } from '../../../../../OpenPgpMobileWebclient/vue-mobil
 import { useCoreStore } from '../../../../../CoreMobileWebclient/vue-mobile/src/stores/index-pinia'
 import { formatHintText } from '../../../../../FilesMobileWebclient/vue-mobile/utils/common'
 import { sendShareableLinkViaEmail } from '../../../utils/send-shareable-link-email'
+import { createProtectedPublicLink } from '../../../files/protected-public-link'
 
 const EncryptedShareableLinkActions = defineAsyncComponent(() =>
   import('./encrypted-shareable-link/EncryptedShareableLinkActions')
@@ -240,7 +241,7 @@ export default {
     console.log('pgp')
   },
   methods: {
-    ...mapActions(useFilesStore, ['getContactSuggestions', 'asyncCreateShareableLink', 'asyncDeletePublicLink', 'changeItemProperty']),
+    ...mapActions(useFilesStore, ['getContactSuggestions', 'asyncDeletePublicLink', 'changeItemProperty']),
     cancelDialog() {
       if (this.showSelectRecipient) {
         this.showSelectRecipient = false
@@ -268,11 +269,25 @@ export default {
       })
     },
     async createShareableLink() {
-      await this.asyncCreateShareableLink({ withPassword: this.withPassword })
-      this.publicLink = this.currentFile.publicLink
-      this.linkPassword = this.currentFile.linkPassword
-      this.isCreatingLink = true
-      this.addDigitalSignature = false
+      const created = await createProtectedPublicLink(this.currentFile, {
+        withPassword: this.withPassword,
+      })
+      if (created) {
+        this.changeItemProperty({
+          item: this.currentFile,
+          property: 'publicLink',
+          value: created.publicLink,
+        })
+        this.changeItemProperty({
+          item: this.currentFile,
+          property: 'linkPassword',
+          value: created.linkPassword,
+        })
+        this.publicLink = created.publicLink
+        this.linkPassword = created.linkPassword
+        this.isCreatingLink = true
+        this.addDigitalSignature = false
+      }
     },
     async removeLink() {
       this.saving = true
