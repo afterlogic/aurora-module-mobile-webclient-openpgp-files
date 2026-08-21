@@ -1,23 +1,30 @@
 import { defineAsyncComponent } from 'vue'
+import modulesManager from 'src/modules-manager'
 
-function loadShareableLinkDialog() {
-  return import('../../../FilesMobileWebclient/vue-mobile/store/index-pinia').then(({ useFilesStore }) => {
-    const file = useFilesStore().currentFile
-    if (file?.paranoidKey && !file?.publicLink) {
-      return import('../components/files/dialogs/EncryptedShareableLinkDialog')
-    }
-    return import('../../../FilesMobileWebclient/vue-mobile/components/dialogs/CreateShareableLinkDialog')
-  }).then((module) => module.default)
-}
+const OPGP_FILES_MODULE = 'OpenPgpFilesWebclient'
 
+/**
+ * Adds a separate secure public-link action (desktop parity).
+ * Does not replace Files' simple createShareableLink.
+ */
 export const setFileActions = (actions) => {
-    const isShowAction = actions.createShareableLink?.isShowAction
-    actions.createShareableLink = {
-        method: null,
-        name: 'createShareableLink',
-        getComponent: () => defineAsyncComponent(() => loadShareableLinkDialog()),
-        displayNameKey: 'OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE',
-        icon: 'SecureLinkIcon',
-        isShowAction,
-    }
+  if (!modulesManager.isModuleAvailable(OPGP_FILES_MODULE)) {
+    return
+  }
+
+  const isShowAction = actions.createShareableLink?.isShowAction
+  actions.createSecureShareableLink = {
+    method: null,
+    name: 'createSecureShareableLink',
+    getComponent: () => defineAsyncComponent(() =>
+      import('../components/files/dialogs/EncryptedShareableLinkDialog')
+    ),
+    displayNameKey: 'OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE',
+    icon: 'SecureLinkIcon',
+    isShowAction: (name, items, storage, path) => {
+      return typeof isShowAction === 'function'
+        ? isShowAction(name, items, storage, path)
+        : true
+    },
+  }
 }

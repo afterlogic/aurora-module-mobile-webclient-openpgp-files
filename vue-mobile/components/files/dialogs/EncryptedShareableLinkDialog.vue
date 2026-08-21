@@ -193,8 +193,8 @@ export default {
     },
     createBtnLabel() {
       return this.withPassword
-          ? 'Create protected link'
-          : 'Create shareable link'
+          ? this.$t('OPENPGPFILESWEBCLIENT.ACTION_SECURE_SHARE')
+          : this.$t('OPENPGPFILESWEBCLIENT.HEADING_CREATE_PUBLIC_LINK')
     },
     isSigningAvailable() {
       return !!(this.currentFile?.linkPassword && this.recipientHasPgpKey && this.myPrivateKeys?.length)
@@ -238,7 +238,6 @@ export default {
     },
   },
   mounted() {
-    console.log('pgp')
   },
   methods: {
     ...mapActions(useFilesStore, ['getContactSuggestions', 'asyncDeletePublicLink', 'changeItemProperty']),
